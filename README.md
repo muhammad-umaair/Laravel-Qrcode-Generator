@@ -1,66 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Introduction
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+You'll learn how to create a QR code. How to set up the qrcode package. Laravel qrcode configuration instructions. How to create a qr code in a function. displaying QR codes in blade templates. How to get it and decode the QR code. 
 
-## About Laravel
+Before you start this project, you need to make sure that you installed imagick already.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Step 1:  Create Laravel Project
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    composer create-project --prefer-dist laravel/laravel qr_code_generator
+  
+  or
+  
+    laravel new qr_code_generator
+  
+## Step 2 : Install Package and Configure
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    composer require simplesoftwareio/simple-qrcode
+  
+  Open config/app.php file and put the code like below:
+    
+    'providers' => [
+      SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
+    ],
 
-## Learning Laravel
+    'aliases' => [
+      ....
+      'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+    ],
+    
+## Step 3 : Basic Usage
+   - Syntax : The basic syntax is:
+   
+          QrCode::size(100)->generate('Your value here!');
+    
+   - Set Size : We can set the size of the QR code image.
+    
+          QrCode::size(300)->generate('Your value here!');
+    
+   - Color : We can also set background color.
+   
+          QrCode::size(250)->backgroundColor(255,255,204)->generate('Your value here!');
+      
+## Step 4 : create controller: Qrcontroller
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    php artisan make:Controller Qrcontroller
+    
+## Step 5 : Paste This Code In Controller
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+    <?php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    namespace App\Http\Controllers;
 
-## Laravel Sponsors
+    use Illuminate\Http\Request;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+    class Qrcontroller extends Controller
+    {
+        function generate()
+        {
+            return view('qrcode');
+        }
+    }
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Step 6: create route
+ 
+    Route::get('generate',[Qrcontroller::class,'generate']);
+    
+## Step 7 : Create Blade File
 
-## Contributing
+    php artisan make:view qrcode
+    
+## Step 8 : Paste This Code In Blade File
+    
+    <!DOCTYPE html>
+    <html>
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <title>Laravel QR Code Generator</title>
+    </head>
 
-## Code of Conduct
+    <body>
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+        <div class="text-center" style="margin-top: 50px;">
+            <h3>Laravel QR Code Generator</h3>
+            <div>
+                <img src="data:image/png;base64, {!! base64_encode(QrCode::format('png')->size(300)->generate('Your value here!')) !!} ">
+            </div>
+            <div> <a href="data:image/png;base64, {!! base64_encode(QrCode::format('png')->size(300)->generate('Your value here!')) !!} " download>Downloads</a></div>
+        </div>
 
-## Security Vulnerabilities
+    </body>
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    </html>    
+## Examples
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+![image](https://user-images.githubusercontent.com/12113932/219296932-cf4dad66-68d1-4d20-a2b6-b127c6c3a9f9.png)
